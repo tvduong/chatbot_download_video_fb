@@ -1,0 +1,12 @@
+# Render.com - chon Worker (Docker), plan Free neu co
+services:
+  - type: worker
+    name: fb-telegram-bot
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: DOWNLOAD_DIR
+        value: /tmp/downloads

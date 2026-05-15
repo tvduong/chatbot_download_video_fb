@@ -1,0 +1,19 @@
+# Koyeb.com - deploy tu GitHub, Docker tu dong
+name: fb-telegram-bot
+
+services:
+  - name: bot
+    docker:
+      dockerfile: Dockerfile
+    instance:
+      type: free
+      regions:
+        - sin
+    env:
+      - name: TELEGRAM_BOT_TOKEN
+        secret: true
+      - name: DOWNLOAD_DIR
+        value: /tmp/downloads
+    scaler:
+      min: 1
+      max: 1

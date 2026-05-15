@@ -1,0 +1,13 @@
+# Fly.io - region sin = Singapore (gan Viet Nam)
+app = 'fb-telegram-bot'
+primary_region = 'sin'
+
+[build]
+  dockerfile = 'Dockerfile'
+
+[env]
+  DOWNLOAD_DIR = '/tmp/downloads'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'

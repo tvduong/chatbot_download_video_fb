@@ -1,0 +1,10 @@
+.venv
+venv
+.env
+downloads
+__pycache__
+*.pyc
+.git
+.gitignore
+run.bat
+*.md
