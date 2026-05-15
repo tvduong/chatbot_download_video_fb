@@ -10,6 +10,12 @@ from bot.downloader import (
     extract_facebook_url,
     is_facebook_url,
 )
+from bot.trash_talk import (
+    is_trash_talk,
+    random_comeback,
+    random_roast,
+    reply_to_insult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +25,10 @@ HELP_TEXT = (
     "• https://www.facebook.com/watch/?v=...\n"
     "• https://fb.watch/xxxxx/\n"
     "• https://www.facebook.com/reel/...\n\n"
-    "Lệnh: /start — hướng dẫn"
+    "Lệnh:\n"
+    "/start — hướng dẫn\n"
+    "/chui — bố chửi random\n"
+    "/cai — chửi lộn với bot (gửi tin nhắn sau lệnh)"
 )
 
 
@@ -27,17 +36,50 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await update.message.reply_text(HELP_TEXT)
 
 
+async def chui_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(random_roast())
+
+
+async def cai_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    context.user_data["cai_mode"] = True
+    await update.message.reply_text(
+        "Ok, cãi đi. Gửi tin nhắn tiếp theo, bố đáp.\n"
+        "Gửi /stop để tắt chế độ cãi."
+    )
+
+
+async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    context.user_data["cai_mode"] = False
+    await update.message.reply_text("Thôi, bố nghỉ miệng. Gửi link FB đi.")
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message or not update.message.text:
         return
 
     text = update.message.text.strip()
-    if not is_facebook_url(text):
+
+    if is_facebook_url(text):
+        await _handle_facebook_link(update, text)
+        return
+
+    if context.user_data.get("cai_mode") or is_trash_talk(text):
         await update.message.reply_text(
-            "Gửi link Facebook hợp lệ (facebook.com, fb.watch, fb.com)."
+            reply_to_insult() if is_trash_talk(text) else random_comeback()
         )
         return
 
+    if text.lower() in {"chui", "chửi", "cãi", "cai", "đánh nhau", "danh nhau"}:
+        await update.message.reply_text(random_comeback())
+        return
+
+    await update.message.reply_text(
+        f"{random_roast()}\n\n"
+        "Gửi link Facebook hoặc /chui — bố chửi cho vui."
+    )
+
+
+async def _handle_facebook_link(update: Update, text: str) -> None:
     url = extract_facebook_url(text)
     if not url:
         return
