@@ -10,12 +10,7 @@ from bot.downloader import (
     extract_facebook_url,
     is_facebook_url,
 )
-from bot.trash_talk import (
-    is_trash_talk,
-    random_comeback,
-    random_roast,
-    reply_to_insult,
-)
+from bot.trash_talk import generate_reply_with_streak, is_trash_talk
 
 logger = logging.getLogger(__name__)
 
@@ -37,20 +32,26 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def chui_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(random_roast())
+    uid = update.effective_user.id if update.effective_user else 0
+    await update.message.reply_text(
+        generate_reply_with_streak("", uid, 0, is_command_chui=True)
+    )
 
 
 async def cai_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.user_data["cai_mode"] = True
+    context.user_data["cai_streak"] = 0
+    uid = update.effective_user.id if update.effective_user else 0
     await update.message.reply_text(
-        "Ok, cãi đi. Gửi tin nhắn tiếp theo, bố đáp.\n"
-        "Gửi /stop để tắt chế độ cãi."
+        generate_reply_with_streak("cãi đi", uid, 1, cai_mode=True)
+        + "\n\nGửi tin tiếp — /stop để nghỉ."
     )
 
 
 async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.user_data["cai_mode"] = False
-    await update.message.reply_text("Thôi, bố nghỉ miệng. Gửi link FB đi.")
+    context.user_data["cai_streak"] = 0
+    await update.message.reply_text("Thôi, bố nghỉ. Có clip thì quăng link.")
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -63,19 +64,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         await _handle_facebook_link(update, text)
         return
 
-    if context.user_data.get("cai_mode") or is_trash_talk(text):
+    uid = update.effective_user.id if update.effective_user else 0
+    cai_mode = context.user_data.get("cai_mode", False)
+
+    if cai_mode or is_trash_talk(text) or text.lower() in {
+        "chui", "chửi", "cãi", "cai", "đánh nhau", "danh nhau"
+    }:
+        streak = context.user_data.get("cai_streak", 0) + 1
+        context.user_data["cai_streak"] = streak
         await update.message.reply_text(
-            reply_to_insult() if is_trash_talk(text) else random_comeback()
+            generate_reply_with_streak(text, uid, streak, cai_mode=cai_mode or True)
         )
         return
 
-    if text.lower() in {"chui", "chửi", "cãi", "cai", "đánh nhau", "danh nhau"}:
-        await update.message.reply_text(random_comeback())
-        return
-
     await update.message.reply_text(
-        f"{random_roast()}\n\n"
-        "Gửi link Facebook hoặc /chui — bố chửi cho vui."
+        generate_reply_with_streak(text, uid, 0, cai_mode=False)
     )
 
 
