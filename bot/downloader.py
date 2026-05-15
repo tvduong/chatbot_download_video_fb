@@ -42,7 +42,7 @@ def download_facebook_video(url: str) -> Path:
     with yt_dlp.YoutubeDL(_ydl_opts(DOWNLOAD_DIR)) as ydl:
         info = ydl.extract_info(url, download=True)
         if info is None:
-            raise DownloadError("Không lấy được thông tin video.")
+            raise DownloadError("tao éo lấy được thông tin video.")
 
         filepath = Path(ydl.prepare_filename(info))
         if not filepath.exists():
@@ -51,7 +51,7 @@ def download_facebook_video(url: str) -> Path:
             if candidates:
                 filepath = max(candidates, key=lambda p: p.stat().st_mtime)
             else:
-                raise DownloadError("Tải xong nhưng không tìm thấy file.")
+                raise DownloadError("tao éo tìm thấy file.")
 
     size = filepath.stat().st_size
     if size > MAX_BYTES:

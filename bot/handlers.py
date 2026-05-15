@@ -14,7 +14,7 @@ from bot.downloader import (
 logger = logging.getLogger(__name__)
 
 HELP_TEXT = (
-    "Chào bạn! Gửi link video Facebook để tải.\n\n"
+    "Gửi link cho anh đi mấy con vợ.\n\n"
     "Ví dụ:\n"
     "• https://www.facebook.com/watch/?v=...\n"
     "• https://fb.watch/xxxxx/\n"
@@ -42,13 +42,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if not url:
         return
 
-    status = await update.message.reply_text("Đang tải video, vui lòng đợi...")
+    status = await update.message.reply_text("Bố đang tải, đợi điđi...")
     await update.message.chat.send_action(ChatAction.UPLOAD_VIDEO)
 
     filepath = None
     try:
         filepath = download_facebook_video(url)
-        await status.edit_text("Đang gửi video...")
+        await status.edit_text("Bố đang gửi...")
 
         with filepath.open("rb") as video_file:
             await update.message.reply_video(
