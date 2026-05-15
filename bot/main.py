@@ -7,7 +7,14 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram.request import HTTPXRequest
 
 from bot.config import TELEGRAM_BOT_TOKEN
-from bot.handlers import cai_command, chui_command, handle_message, start_command, stop_command
+from bot.handlers import (
+    cai_command,
+    chui_command,
+    do_command,
+    handle_message,
+    start_command,
+    stop_command,
+)
 from bot.health import start_health_server
 
 
@@ -32,6 +39,7 @@ def main() -> None:
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(CommandHandler("chui", chui_command))
     app.add_handler(CommandHandler("cai", cai_command))
+    app.add_handler(CommandHandler("do", do_command))
     app.add_handler(CommandHandler("stop", stop_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
