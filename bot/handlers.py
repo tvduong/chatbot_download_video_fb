@@ -107,7 +107,7 @@ async def _handle_riddle_answer(
 
     streak = context.user_data.get("cai_streak", 0) + 1
     context.user_data["cai_streak"] = streak
-    await update.message.reply_text(_riddles.wrong_reply(uid, riddle))
+    await update.message.reply_text(_riddles.wrong_reply(uid, riddle, text))
     new_riddle = _riddles.pick(uid)
     context.user_data["active_riddle"] = new_riddle
     await update.message.reply_text(
