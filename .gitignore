@@ -1,6 +1,8 @@
 .env
 !.env.example
 downloads/
+# giu riddles.json da build
+# bot/data/riddles.json
 __pycache__/
 *.pyc
 .venv/
