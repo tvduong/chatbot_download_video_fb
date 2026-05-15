@@ -13,5 +13,8 @@ COPY bot/ bot/
 
 ENV DOWNLOAD_DIR=/tmp/downloads
 ENV PYTHONUNBUFFERED=1
+ENV PORT=10000
+
+EXPOSE 10000
 
 CMD ["python", "-m", "bot.main"]

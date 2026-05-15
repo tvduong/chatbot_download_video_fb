@@ -1,12 +1,16 @@
-# Render.com - chon Worker (Docker), plan Free neu co
+# Render Blueprint: https://dashboard.render.com/
+# Free tier: Web Service (Worker khong co free)
 services:
-  - type: worker
-    name: fb-telegram-bot
+  - type: web
+    name: chatbot-download-video-fb
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
+    healthCheckPath: /
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
       - key: DOWNLOAD_DIR
         value: /tmp/downloads
+      - key: RENDER
+        value: "true"

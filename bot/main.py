@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import sys
 
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
@@ -7,6 +8,7 @@ from telegram.request import HTTPXRequest
 
 from bot.config import TELEGRAM_BOT_TOKEN
 from bot.handlers import handle_message, start_command
+from bot.health import start_health_server
 
 
 def main() -> None:
@@ -29,6 +31,10 @@ def main() -> None:
     )
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    if os.getenv("RENDER") or os.getenv("PORT"):
+        start_health_server()
+        logging.info("Health server on PORT=%s", os.getenv("PORT", "10000"))
 
     print("Bot is running... (Ctrl+C to stop)")
     try:
