@@ -1,5 +1,5 @@
-# Fly.io - region sin = Singapore (gan Viet Nam)
-app = 'fb-telegram-bot'
+# Ten app phai unique tren Fly.io - doi neu bi trung
+app = 'chatbot-download-video-fb'
 primary_region = 'sin'
 
 [build]
@@ -8,6 +8,10 @@ primary_region = 'sin'
 [env]
   DOWNLOAD_DIR = '/tmp/downloads'
 
+[deploy]
+  strategy = 'immediate'
+
 [[vm]]
   size = 'shared-cpu-1x'
   memory = '512mb'
+  count = 1
