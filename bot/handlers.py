@@ -19,7 +19,7 @@ from bot.lottery import (
     LotteryError,
     check_numbers,
     format_results,
-    parse_bet_numbers,
+    parse_bet_text,
 )
 from bot.trash_talk import generate_reply_with_streak, is_trash_talk
 
@@ -112,24 +112,37 @@ async def dove_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await _reply_check(update, args)
 
 
-async def _reply_lottery(update: Update, region: str) -> None:
+async def _reply_lottery(
+    update: Update,
+    region: str,
+    date: str | None = None,
+    province: str | None = None,
+) -> None:
     try:
         await update.message.reply_chat_action(ChatAction.TYPING)
-        await update.message.reply_text(format_results(region))
+        await update.message.reply_text(format_results(region, date=date, province=province))
     except LotteryError as exc:
         await update.message.reply_text(str(exc))
 
 
 async def _reply_check(update: Update, text: str) -> None:
-    nums, region = parse_bet_numbers(text)
-    if not nums:
+    nums, region, date, province = parse_bet_text(text)
+    if not nums and not date and not province:
         await update.message.reply_text(
-            "Gửi số cần dò.\nVD: /dove 67294\nVD: /dove 94 388\nVD: /dove 216215 mn"
+            "Gửi số cần dò.\n"
+            "VD: /dove 67294\n"
+            "VD: /dove 39 bd 22/05/2026\n"
+            "VD: /dove 12345 binh duong 22/05/2026"
         )
+        return
+    if not nums:
+        await _reply_lottery(update, region or "mn", date=date, province=province or "bd")
         return
     try:
         await update.message.reply_chat_action(ChatAction.TYPING)
-        await update.message.reply_text(check_numbers(nums, region))
+        await update.message.reply_text(
+            check_numbers(nums, region, date=date, province=province)
+        )
     except LotteryError as exc:
         await update.message.reply_text(str(exc))
 
