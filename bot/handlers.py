@@ -1,5 +1,6 @@
 import logging
 import random
+import re
 
 from telegram import Update
 from telegram.constants import ChatAction
@@ -13,9 +14,21 @@ from bot.downloader import (
 )
 from bot.riddles import session as _riddles
 from bot.riddles import should_ask_riddle
+from bot.lottery import (
+    HELP_LOTTERY,
+    LotteryError,
+    check_numbers,
+    format_results,
+    parse_bet_numbers,
+)
 from bot.trash_talk import generate_reply_with_streak, is_trash_talk
 
 logger = logging.getLogger(__name__)
+
+_LOTTERY_TEXT = re.compile(
+    r"^(dò|dove|dò vé|do ve|dò\s+số)\s+(.+)$",
+    re.IGNORECASE,
+)
 
 HELP_TEXT = (
     "Gửi link cho anh đi mấy con vợ.\n\n"
@@ -28,6 +41,7 @@ HELP_TEXT = (
     "/chui — bố chửi random\n"
     "/cai — chửi lộn + câu đố (sai thì ăn chửi)\n"
     "/do — ra câu đố ngay\n"
+    "/xs — dò vé số VN (xem /xs)\n"
     "/stop — nghỉ"
 )
 
@@ -77,6 +91,49 @@ async def stop_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text("Thôi, bố nghỉ. Có clip thì quăng link.")
 
 
+async def xs_help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(HELP_LOTTERY)
+
+
+async def xsmb_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_lottery(update, "mb")
+
+
+async def xsmn_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_lottery(update, "mn")
+
+
+async def xsmt_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _reply_lottery(update, "mt")
+
+
+async def dove_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    args = " ".join(context.args) if context.args else ""
+    await _reply_check(update, args)
+
+
+async def _reply_lottery(update: Update, region: str) -> None:
+    try:
+        await update.message.reply_chat_action(ChatAction.TYPING)
+        await update.message.reply_text(format_results(region))
+    except LotteryError as exc:
+        await update.message.reply_text(str(exc))
+
+
+async def _reply_check(update: Update, text: str) -> None:
+    nums, region = parse_bet_numbers(text)
+    if not nums:
+        await update.message.reply_text(
+            "Gửi số cần dò.\nVD: /dove 67294\nVD: /dove 94 388\nVD: /dove 216215 mn"
+        )
+        return
+    try:
+        await update.message.reply_chat_action(ChatAction.TYPING)
+        await update.message.reply_text(check_numbers(nums, region))
+    except LotteryError as exc:
+        await update.message.reply_text(str(exc))
+
+
 async def _send_riddle(update: Update, context: ContextTypes.DEFAULT_TYPE, uid: int) -> None:
     riddle = _riddles.pick(uid)
     context.user_data["active_riddle"] = riddle
@@ -124,6 +181,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     if is_facebook_url(text):
         await _handle_facebook_link(update, text)
+        return
+
+    lottery_m = _LOTTERY_TEXT.match(text)
+    if lottery_m:
+        await _reply_check(update, lottery_m.group(2))
         return
 
     uid = update.effective_user.id if update.effective_user else 0

@@ -11,9 +11,14 @@ from bot.handlers import (
     cai_command,
     chui_command,
     do_command,
+    dove_command,
     handle_message,
     start_command,
     stop_command,
+    xs_help_command,
+    xsmb_command,
+    xsmn_command,
+    xsmt_command,
 )
 from bot.health import start_health_server
 
@@ -59,6 +64,11 @@ def main() -> None:
     app.add_handler(CommandHandler("chui", chui_command))
     app.add_handler(CommandHandler("cai", cai_command))
     app.add_handler(CommandHandler("do", do_command))
+    app.add_handler(CommandHandler("xs", xs_help_command))
+    app.add_handler(CommandHandler("xsmb", xsmb_command))
+    app.add_handler(CommandHandler("xsmn", xsmn_command))
+    app.add_handler(CommandHandler("xsmt", xsmt_command))
+    app.add_handler(CommandHandler("dove", dove_command))
     app.add_handler(CommandHandler("stop", stop_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
