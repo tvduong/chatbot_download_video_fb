@@ -16,4 +16,5 @@ class _HealthHandler(BaseHTTPRequestHandler):
 def start_health_server() -> None:
     port = int(os.getenv("PORT", "10000"))
     server = HTTPServer(("0.0.0.0", port), _HealthHandler)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()

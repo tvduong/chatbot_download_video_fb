@@ -17,16 +17,29 @@ from bot.handlers import (
 )
 from bot.health import start_health_server
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+    stream=sys.stdout,
+    force=True,
+)
+log = logging.getLogger("bot.main")
+
 
 def main() -> None:
-    logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
+    log.info("=== Bot starting ===")
+    log.info("PORT=%s RENDER=%s", os.getenv("PORT"), os.getenv("RENDER"))
 
     if not TELEGRAM_BOT_TOKEN:
-        print("Thiếu TELEGRAM_BOT_TOKEN. Copy .env.example thành .env và điền token.")
+        log.error("Missing TELEGRAM_BOT_TOKEN in environment variables")
         sys.exit(1)
+
+    log.info("Token OK (length=%d)", len(TELEGRAM_BOT_TOKEN))
+
+    port = os.getenv("PORT")
+    if port:
+        start_health_server()
+        log.info("Health server listening on 0.0.0.0:%s", port)
 
     request = HTTPXRequest(connect_timeout=30.0, read_timeout=30.0, write_timeout=30.0)
     app = (
@@ -43,11 +56,7 @@ def main() -> None:
     app.add_handler(CommandHandler("stop", stop_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
-    if os.getenv("RENDER") or os.getenv("PORT"):
-        start_health_server()
-        logging.info("Health server on PORT=%s", os.getenv("PORT", "10000"))
-
-    print("Bot is running... (Ctrl+C to stop)")
+    log.info("Starting Telegram polling...")
     try:
         asyncio.get_event_loop()
     except RuntimeError:

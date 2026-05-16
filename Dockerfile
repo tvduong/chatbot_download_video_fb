@@ -13,8 +13,8 @@ COPY bot/ bot/
 
 ENV DOWNLOAD_DIR=/tmp/downloads
 ENV PYTHONUNBUFFERED=1
-ENV PORT=10000
+ENV RENDER=true
 
-EXPOSE 10000
+# Render tu gan PORT — khong hardcode
 
 CMD ["python", "-m", "bot.main"]
