@@ -1,5 +1,3 @@
-# Render Blueprint: https://dashboard.render.com/
-# Free tier: Web Service (Worker khong co free)
 services:
   - type: web
     name: chatbot-download-video-fb
@@ -10,7 +8,5 @@ services:
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
-      - key: DOWNLOAD_DIR
-        value: /tmp/downloads
       - key: RENDER
         value: "true"

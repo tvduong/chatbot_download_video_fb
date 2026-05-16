@@ -457,9 +457,7 @@ def check_numbers(
             else:
                 lines.append(f"❌ Số {raw}: trượt")
 
-    lines.append(
-        "\n🎉 Trúng rồi!" if any_hit else "\n🐔 Trượt — gà đồng hành."
-    )
+    lines.append("\n🎉 Có nhịp trúng!" if any_hit else "\n❌ Không trúng giải nào.")
     return "\n".join(lines)
 
 
@@ -491,22 +489,10 @@ def format_results(
         for key in ["G.ĐB", "G.8", "G.1", "G.2", "G.3", "G.4", "G.5", "G.6", "G.7"]:
             if key in draw.prizes:
                 lines.append(f"{key}: {' - '.join(draw.prizes[key])}")
-        lines.append("\n/dove <số> bd " + draw.date)
+        lines.append(f"\nDò số: /dove <số> {draw.province_filter} {draw.date}")
         return "\n".join(lines)
 
-    lines = [f"📊 KQXS {NAMES[region]} — {draw.date}\n"]
-    if draw.region == "mb":
-        for key in ["G.ĐB", "G.1", "G.2", "G.3", "G.4", "G.5", "G.6", "G.7"]:
-            if key in draw.prizes:
-                lines.append(f"{key}: {' - '.join(draw.prizes[key])}")
-    elif draw.provinces:
-        for prov, prizes in draw.provinces.items():
-            lines.append(f"\n🏙 {prov}")
-            for key in ["G.ĐB", "G.8", "G.1", "G.2"]:
-                if key in prizes:
-                    lines.append(f"  {key}: {' | '.join(prizes[key])}")
-    lines.append("\n/dove <số> bd 23/05/2026 — dò theo tỉnh + ngày")
-    return "\n".join(lines)
+    raise LotteryError("Cần chỉ rõ tỉnh và ngày. VD: /kq bd 15/05/2026")
 
 
 _DATE_RE = re.compile(
@@ -558,18 +544,19 @@ def parse_bet_numbers(text: str) -> tuple[list[str], str]:
     return nums, region
 
 
-HELP_LOTTERY = (
-    "🎰 Dò vé số VN\n\n"
-    "/xsmb — KQ miền Bắc hôm nay\n"
-    "/xsmn — KQ miền Nam hôm nay\n"
-    "/xsmt — KQ miền Trung hôm nay\n\n"
-    "/dove <số> — dò vé\n"
-    "  /dove 67294\n"
-    "  /dove 39 bd 22/05/2026\n"
-    "  /dove 39 bd 15/05/2026\n"
-    "  /dove 12345 binh duong 15/05/2026\n\n"
-    "📌 **Bình Dương quay Thứ Sáu** — 23/05/2026 (Thứ Bảy) "
-    "**không có** XS Bình Dương.\n"
-    "Dùng ngày Thứ Sáu có KQ, VD: /dove 39 bd 15/05/2026\n\n"
-    "Nguồn: xosodaiphat.com — tham khảo."
+HELP_TEXT = (
+    "🎰 Bot dò vé số theo TỈNH + NGÀY\n\n"
+    "📊 Xem các giải:\n"
+    "  /kq <tỉnh> <ngày>\n"
+    "  VD: /kq binh duong 15/05/2026\n"
+    "  VD: /kq bd 15/05/2026\n\n"
+    "🔍 Dò số trúng:\n"
+    "  /dove <số> <tỉnh> <ngày>\n"
+    "  VD: /dove 39 bd 15/05/2026\n"
+    "  VD: /dove 94 660519 binh duong 15/05/2026\n\n"
+    "💬 Hoặc gõ:\n"
+    "  bd 15/05/2026 → xem giải\n"
+    "  dò 39 bd 15/05/2026 → dò vé\n\n"
+    "Tỉnh hỗ trợ: bd, vinh long, tphcm, can tho, dong nai, da nang…\n"
+    "Nguồn: xosodaiphat.com (tham khảo)"
 )
