@@ -26,6 +26,11 @@ logging.basicConfig(
 log = logging.getLogger("bot.main")
 
 
+async def _post_init(application: Application) -> None:
+    me = await application.bot.get_me()
+    log.info("Telegram ready: @%s (id=%s)", me.username, me.id)
+
+
 def main() -> None:
     log.info("=== Bot starting ===")
     log.info("PORT=%s RENDER=%s", os.getenv("PORT"), os.getenv("RENDER"))
@@ -47,6 +52,7 @@ def main() -> None:
         .token(TELEGRAM_BOT_TOKEN)
         .request(request)
         .get_updates_request(request)
+        .post_init(_post_init)
         .build()
     )
     app.add_handler(CommandHandler("start", start_command))
@@ -65,4 +71,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        log.exception("Bot crashed")
+        sys.exit(1)
